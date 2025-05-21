@@ -1,49 +1,12 @@
-options:
-  logging: CLOUD_LOGGING_ONLY
-
 steps:
-# Debug step to print env vars (optional, remove if you w
-- id: 'Print Environment Variables'
-  name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:latest'
+- name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:latest'
   entrypoint: 'bash'
   args:
-    - -c
+    - '-c'
     - |
-      echo "--- Environment Variables ---"
+      echo "Printing environment variables:"
       env
-      echo "--- HOME = $HOME ---"
-
-# Fetch the service account key from Secret Manager into $HOME
-- id: 'Fetch Service Account Key'
-  name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:latest'
-  entrypoint: 'bash'
-  args:
-    - -c
-    - |
-      echo "Saving service account key to $HOME/service-account-key.json"
-      gcloud secrets versions access latest --secret=service-account-key-dev > "$HOME/service-account-key.json"
-
-# Terraform Init step
-- id: 'Init OpenTofu'
-  name: 'hashicorp/terraform:latest'
-  dir: 'tofu'
-  entrypoint: 'sh'
-  args:
-    - -c
-    - |
-      echo "Running terraform init..."
-      terraform init -backend-config="bucket=your-state-bucket" \
-                     -backend-config="prefix=terraform/state/dev"
-
-# Terraform Apply step
-- id: 'Apply OpenTofu'
-  name: 'hashicorp/terraform:latest'
-  dir: 'tofu'
-  entrypoint: 'sh'
-  args:
-    - -c
-    - |
-      echo "Running terraform apply..."
-      terraform apply -var-file=../environments/dev/terraform.tfvars \
-                      -var="credentials=$HOME/service-account-key.json" \
-                      -auto-approve
+      echo "HOME is: $HOME"
+      echo "Writing test file to $HOME/testfile.txt"
+      echo "Hello Cloud Build" > "$HOME/testfile.txt"
+      cat "$HOME/testfile.txt"
