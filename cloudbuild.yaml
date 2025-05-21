@@ -1,21 +1,11 @@
-# options:
-#   logging: CLOUD_LOGGING_ONLY
-
-# steps:
-# - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:latest'
-#   entrypoint: 'bash'
-#   args:
-#     - '-c'
-#     - |
-#       echo "Hello from Cloud Build"
-
 options:
   logging: CLOUD_LOGGING_ONLY
 
 substitutions:
-  _ENVIRONMENT: 'dev'   # Add more environments as needed
+  _ENVIRONMENT: "dev"
 
 steps:
+# Debug step to print env vars (optional)
 - id: 'Print Environment Variables'
   name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:latest'
   entrypoint: 'bash'
@@ -26,6 +16,7 @@ steps:
       env
       echo "--- HOME = $HOME ---"
 
+# Fetch the service account key from Secret Manager into $HOME
 - id: 'Fetch Service Account Key'
   name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:latest'
   entrypoint: 'bash'
@@ -35,6 +26,7 @@ steps:
       echo "Saving service account key to $HOME/service-account-key.json"
       gcloud secrets versions access latest --secret=service-account-key-${_ENVIRONMENT} > "$HOME/service-account-key.json"
 
+# Terraform Init step
 - id: 'Init OpenTofu'
   name: 'hashicorp/terraform:latest'
   dir: 'tofu'
@@ -46,6 +38,7 @@ steps:
       terraform init -backend-config="bucket=your-state-bucket" \
                      -backend-config="prefix=terraform/state/${_ENVIRONMENT}"
 
+# Terraform Apply step
 - id: 'Apply OpenTofu'
   name: 'hashicorp/terraform:latest'
   dir: 'tofu'
