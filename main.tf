@@ -1,5 +1,5 @@
 provider "google" {
-  project = var.project_id
+  project = "prefab-bedrock-459220-u6"
   region  = var.region
 }
 
