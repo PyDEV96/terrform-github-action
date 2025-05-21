@@ -1,6 +1,8 @@
-
 substitutions:
-  _ENVIRONMENT: 'dev'  # Default environment, overridden by specific trigger
+  _ENVIRONMENT: 'dev'
+
+options:
+  logging: CLOUD_LOGGING_ONLY
 
 steps:
 - id: 'Fetch Service Account Key'
@@ -9,10 +11,7 @@ steps:
   args:
   - '-c'
   - |
-    # Set gcloud project for actions 
-    gcloud config set project your-${_ENVIRONMENT}-project-id
-
-    # Access environment-specific secret
+    gcloud config set project "prefab-bedrock-459220-u6"
     gcloud secrets versions access latest --secret=service-account-key-${_ENVIRONMENT} > $HOME/service-account-key.json
 
 - id: 'Init OpenTofu'
