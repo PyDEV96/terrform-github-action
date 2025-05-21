@@ -53,7 +53,8 @@
 
 
 
-
+options:
+  logging: CLOUD_LOGGING_ONLY
 
 steps:
   - name: 'hashicorp/terraform:light'
