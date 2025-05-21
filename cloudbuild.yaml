@@ -1,0 +1,37 @@
+
+substitutions:
+  _ENVIRONMENT: 'dev'  # Default environment, overridden by specific trigger
+
+steps:
+- id: 'Fetch Service Account Key'
+  name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:latest'
+  entrypoint: 'bash'
+  args:
+  - '-c'
+  - |
+    # Set gcloud project for actions 
+    gcloud config set project your-${_ENVIRONMENT}-project-id
+
+    # Access environment-specific secret
+    gcloud secrets versions access latest --secret=service-account-key-${_ENVIRONMENT} > $HOME/service-account-key.json
+
+- id: 'Init OpenTofu'
+  name: 'hashicorp/terraform:latest'
+  dir: 'tofu'
+  entrypoint: 'sh'
+  args:
+  - '-c'
+  - |
+    terraform init -backend-config="bucket=your-state-bucket" \
+                   -backend-config="prefix=terraform/state/${_ENVIRONMENT}"
+
+- id: 'Apply OpenTofu'
+  name: 'hashicorp/terraform:latest'
+  dir: 'tofu'
+  entrypoint: 'sh'
+  args:
+  - '-c'
+  - |
+    terraform apply -var-file=../environments/${_ENVIRONMENT}/terraform.tfvars \
+                    -var="credentials=$HOME/service-account-key.json" \
+                    -auto-approve
