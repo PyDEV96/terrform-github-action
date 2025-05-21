@@ -5,7 +5,7 @@ substitutions:
   _ENVIRONMENT: "dev"
 
 steps:
-# Debug step to print env vars (optional)
+# Debug step to print env vars (opt
 - id: 'Print Environment Variables'
   name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:latest'
   entrypoint: 'bash'
