@@ -1,6 +1,3 @@
-substitutions:
-  _ENVIRONMENT: 'dev'
-
 options:
   logging: CLOUD_LOGGING_ONLY
 
@@ -12,7 +9,7 @@ steps:
     - '-c'
     - |
       echo "Saving key to \$HOME/service-account-key.json"
-      gcloud secrets versions access latest --secret=service-account-key-${_ENVIRONMENT} > "$HOME/service-account-key.json"
+      gcloud secrets versions access latest --secret=service-account-key-dev > "$HOME/service-account-key.json"
 
 - id: 'Init OpenTofu'
   name: 'hashicorp/terraform:latest'
@@ -22,7 +19,7 @@ steps:
     - '-c'
     - |
       terraform init -backend-config="bucket=your-state-bucket" \
-                     -backend-config="prefix=terraform/state/${_ENVIRONMENT}"
+                     -backend-config="prefix=terraform/state/dev"
 
 - id: 'Apply OpenTofu'
   name: 'hashicorp/terraform:latest'
@@ -31,6 +28,6 @@ steps:
   args:
     - '-c'
     - |
-      terraform apply -var-file=../environments/${_ENVIRONMENT}/terraform.tfvars \
+      terraform apply -var-file=../environments/dev/terraform.tfvars \
                       -var="credentials=$HOME/service-account-key.json" \
                       -auto-approve
