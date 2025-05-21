@@ -9,10 +9,10 @@ steps:
   name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:latest'
   entrypoint: 'bash'
   args:
-  - '-c'
-  - |
-    gcloud config set project "prefab-bedrock-459220-u6"
-    gcloud secrets versions access latest --secret=service-account-key-${_ENVIRONMENT} > $HOME/service-account-key.json
+    - '-c'
+    - |
+      echo "Saving key to \$HOME"
+      gcloud secrets versions access latest --secret=service-account-key-${_ENVIRONMENT}
 
 - id: 'Init OpenTofu'
   name: 'hashicorp/terraform:latest'
