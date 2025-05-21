@@ -1,12 +1,10 @@
+options:
+  logging: CLOUD_LOGGING_ONLY
+
 steps:
 - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:latest'
   entrypoint: 'bash'
   args:
     - '-c'
     - |
-      echo "Printing environment variables:"
-      env
-      echo "HOME is: $HOME"
-      echo "Writing test file to $HOME/testfile.txt"
-      echo "Hello Cloud Build" > "$HOME/testfile.txt"
-      cat "$HOME/testfile.txt"
+      echo "Hello from Cloud Build"
