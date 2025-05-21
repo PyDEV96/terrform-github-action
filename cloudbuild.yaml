@@ -6,17 +6,17 @@ steps:
   name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:latest'
   entrypoint: 'bash'
   args:
-    - '-c'
+    - -c
     - |
-      echo "Saving key to \$HOME/service-account-key.json"
-      gcloud secrets versions access latest --secret=service-account-key-dev > "$HOME/service-account-key.json"
+      echo "Saving key to $HOME/service-account-key.json"
+      gcloud secrets versions access latest --secret=service-account-key-dev > $HOME/service-account-key.json
 
 - id: 'Init OpenTofu'
   name: 'hashicorp/terraform:latest'
   dir: 'tofu'
   entrypoint: 'sh'
   args:
-    - '-c'
+    - -c
     - |
       terraform init -backend-config="bucket=your-state-bucket" \
                      -backend-config="prefix=terraform/state/dev"
@@ -26,7 +26,7 @@ steps:
   dir: 'tofu'
   entrypoint: 'sh'
   args:
-    - '-c'
+    - -c
     - |
       terraform apply -var-file=../environments/dev/terraform.tfvars \
                       -var="credentials=$HOME/service-account-key.json" \
