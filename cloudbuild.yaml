@@ -14,17 +14,17 @@ steps:
     - |
       echo "--- Environment Variables ---"
       env
-      echo "--- HOME = $HOME ---"
+      echo "--- HOME = $$HOME ---"
 
-# Fetch the service account key from Secret Manager into $HOME
+# Fetch the service account key from Secret Manager into $$HOME
 - id: 'Fetch Service Account Key'
   name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:latest'
   entrypoint: 'bash'
   args:
     - -c
     - |
-      echo "Saving service account key to $HOME/service-account-key.json"
-      gcloud secrets versions access latest --secret=service-account-key-${_ENVIRONMENT} > "$HOME/service-account-key.json"
+      echo "Saving service account key to $$HOME/service-account-key.json"
+      gcloud secrets versions access latest --secret=service-account-key-${_ENVIRONMENT} > "$$HOME/service-account-key.json"
 
 # Terraform Init step
 - id: 'Init OpenTofu'
@@ -48,5 +48,5 @@ steps:
     - |
       echo "Running terraform apply..."
       terraform apply -var-file=../environments/${_ENVIRONMENT}/terraform.tfvars \
-                      -var="credentials=$HOME/service-account-key.json" \
+                      -var="credentials=$$HOME/service-account-key.json" \
                       -auto-approve
