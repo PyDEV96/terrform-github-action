@@ -4,7 +4,7 @@ provider "google" {
 }
 
 resource "google_storage_bucket" "example_bucket" {
-  name     = var.bucket_name
+  name     = "testing-user-auto01"
   location = var.region
   force_destroy = true
 
