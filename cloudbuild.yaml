@@ -35,7 +35,7 @@ steps:
     - -c
     - |
       echo "Running terraform init..."
-      terraform init -backend-config="bucket=your-state-bucket" \
+      terraform init -backend-config="cloudbuild-state-bucket" \
                      -backend-config="prefix=terraform/state/${_ENVIRONMENT}"
 
 # Terraform Apply step
@@ -47,6 +47,6 @@ steps:
     - -c
     - |
       echo "Running terraform apply..."
-      terraform apply -var-file=../environments/${_ENVIRONMENT}/terraform.tfvars \
+      terraform apply -var-file=../environments/${_ENVIRONMENT}/dev.tfvars \
                       -var="credentials=$$HOME/service-account-key.json" \
                       -auto-approve
