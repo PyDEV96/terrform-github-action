@@ -1,10 +1,59 @@
+# options:
+#   logging: CLOUD_LOGGING_ONLY
+
+# steps:
+# - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:latest'
+#   entrypoint: 'bash'
+#   args:
+#     - '-c'
+#     - |
+#       echo "Hello from Cloud Build"
+
 options:
   logging: CLOUD_LOGGING_ONLY
 
+substitutions:
+  _ENVIRONMENT: 'dev'   # Add more environments as needed
+
 steps:
-- name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:latest'
+- id: 'Print Environment Variables'
+  name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:latest'
   entrypoint: 'bash'
   args:
-    - '-c'
+    - -c
     - |
-      echo "Hello from Cloud Build"
+      echo "--- Environment Variables ---"
+      env
+      echo "--- HOME = $HOME ---"
+
+- id: 'Fetch Service Account Key'
+  name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:latest'
+  entrypoint: 'bash'
+  args:
+    - -c
+    - |
+      echo "Saving service account key to $HOME/service-account-key.json"
+      gcloud secrets versions access latest --secret=service-account-key-${_ENVIRONMENT} > "$HOME/service-account-key.json"
+
+- id: 'Init OpenTofu'
+  name: 'hashicorp/terraform:latest'
+  dir: 'tofu'
+  entrypoint: 'sh'
+  args:
+    - -c
+    - |
+      echo "Running terraform init..."
+      terraform init -backend-config="bucket=your-state-bucket" \
+                     -backend-config="prefix=terraform/state/${_ENVIRONMENT}"
+
+- id: 'Apply OpenTofu'
+  name: 'hashicorp/terraform:latest'
+  dir: 'tofu'
+  entrypoint: 'sh'
+  args:
+    - -c
+    - |
+      echo "Running terraform apply..."
+      terraform apply -var-file=../environments/${_ENVIRONMENT}/terraform.tfvars \
+                      -var="credentials=$HOME/service-account-key.json" \
+                      -auto-approve
