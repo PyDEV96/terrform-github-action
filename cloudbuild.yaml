@@ -2,26 +2,28 @@ options:
   logging: CLOUD_LOGGING_ONLY
 
 steps:
-- id: 'Print ENV'
+# Debug step to print env vars (optional, remove if you want)
+- id: 'Print Environment Variables'
   name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:latest'
   entrypoint: 'bash'
   args:
     - -c
     - |
-      echo "--- ENVIRONMENT VARIABLES ---"
+      echo "--- Environment Variables ---"
       env
-      echo "--- HOME is: $HOME ---"
-      echo "--- Working Directory: $(pwd) ---"
+      echo "--- HOME = $HOME ---"
 
+# Fetch the service account key from Secret Manager into $HOME
 - id: 'Fetch Service Account Key'
   name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:latest'
   entrypoint: 'bash'
   args:
     - -c
     - |
-      echo "Saving key to $HOME/service-account-key.json"
-      gcloud secrets versions access latest --secret=service-account-key-dev > $HOME/service-account-key.json
+      echo "Saving service account key to $HOME/service-account-key.json"
+      gcloud secrets versions access latest --secret=service-account-key-dev > "$HOME/service-account-key.json"
 
+# Terraform Init step
 - id: 'Init OpenTofu'
   name: 'hashicorp/terraform:latest'
   dir: 'tofu'
@@ -29,10 +31,11 @@ steps:
   args:
     - -c
     - |
-      echo "Starting Terraform Init in $(pwd)"
+      echo "Running terraform init..."
       terraform init -backend-config="bucket=your-state-bucket" \
                      -backend-config="prefix=terraform/state/dev"
 
+# Terraform Apply step
 - id: 'Apply OpenTofu'
   name: 'hashicorp/terraform:latest'
   dir: 'tofu'
@@ -40,7 +43,7 @@ steps:
   args:
     - -c
     - |
-      echo "Starting Terraform Apply in $(pwd)"
+      echo "Running terraform apply..."
       terraform apply -var-file=../environments/dev/terraform.tfvars \
                       -var="credentials=$HOME/service-account-key.json" \
                       -auto-approve
