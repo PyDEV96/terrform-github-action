@@ -11,26 +11,26 @@ steps:
   args:
     - '-c'
     - |
-      echo "Saving key to \$HOME"
-      gcloud secrets versions access latest --secret=service-account-key-${_ENVIRONMENT}
+      echo "Saving key to \$HOME/service-account-key.json"
+      gcloud secrets versions access latest --secret=service-account-key-${_ENVIRONMENT} > "$HOME/service-account-key.json"
 
 - id: 'Init OpenTofu'
   name: 'hashicorp/terraform:latest'
   dir: 'tofu'
   entrypoint: 'sh'
   args:
-  - '-c'
-  - |
-    terraform init -backend-config="bucket=your-state-bucket" \
-                   -backend-config="prefix=terraform/state/${_ENVIRONMENT}"
+    - '-c'
+    - |
+      terraform init -backend-config="bucket=your-state-bucket" \
+                     -backend-config="prefix=terraform/state/${_ENVIRONMENT}"
 
 - id: 'Apply OpenTofu'
   name: 'hashicorp/terraform:latest'
   dir: 'tofu'
   entrypoint: 'sh'
   args:
-  - '-c'
-  - |
-    terraform apply -var-file=../environments/${_ENVIRONMENT}/terraform.tfvars \
-                    -var="credentials=$HOME/service-account-key.json" \
-                    -auto-approve
+    - '-c'
+    - |
+      terraform apply -var-file=../environments/${_ENVIRONMENT}/terraform.tfvars \
+                      -var="credentials=$HOME/service-account-key.json" \
+                      -auto-approve
