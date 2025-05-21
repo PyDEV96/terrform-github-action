@@ -2,7 +2,7 @@ options:
   logging: CLOUD_LOGGING_ONLY
 
 steps:
-# Debug step to print env vars (optional, remove if you want)
+# Debug step to print env vars (optional, remove if you w
 - id: 'Print Environment Variables'
   name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:latest'
   entrypoint: 'bash'
