@@ -56,12 +56,29 @@
 options:
   logging: CLOUD_LOGGING_ONLY
 
+substitutions:
+  _ENV: "dev"  # Default value, will be overridden when running the manual trigger
+
 steps:
   - name: 'hashicorp/terraform:light'
     entrypoint: 'sh'
     args:
       - '-c'
       - |
+        echo "Selected environment: $_ENV"
+
+        # Set environment-specific variables or paths
+        if [ "$_ENV" = "dev" ]; then
+          export TF_VAR_env="dev"
+        elif [ "$_ENV" = "stage" ]; then
+          export TF_VAR_env="stage"
+        elif [ "$_ENV" = "prod" ]; then
+          export TF_VAR_env="prod"
+        else
+          echo "Invalid environment: $_ENV"
+          exit 1
+        fi
+
         terraform init
         terraform plan -out=tfplan
         terraform apply -auto-approve tfplan
