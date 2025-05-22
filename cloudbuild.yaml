@@ -52,12 +52,11 @@
 #                       -auto-approve
 
 
-
 options:
   logging: CLOUD_LOGGING_ONLY
 
 substitutions:
-  _ENV: "dev"  # Default value, will be overridden when running the manual trigger
+  _ENV: "dev"  # Default, gets overridden in UI when you manually run the trigger
 
 steps:
   - name: 'hashicorp/terraform:light'
@@ -65,23 +64,34 @@ steps:
     args:
       - '-c'
       - |
-        echo "Selected environment: $_ENV"
+        echo "Deploying to environment: $_ENV"
 
-        # Set environment-specific variables or paths
-        if [ "$_ENV" = "dev" ]; then
-          export TF_VAR_env="dev"
-        elif [ "$_ENV" = "stage" ]; then
-          export TF_VAR_env="stage"
-        elif [ "$_ENV" = "prod" ]; then
-          export TF_VAR_env="prod"
-        else
-          echo "Invalid environment: $_ENV"
-          exit 1
-        fi
+        case "$_ENV" in
+          dev)
+            export TF_VAR_project_id="my-dev-project"
+            export TF_VAR_region="us-central1"
+            export TF_VAR_bucket_name="dev-bucket"
+            ;;
+          stage)
+            export TF_VAR_project_id="my-stage-project"
+            export TF_VAR_region="us-east1"
+            export TF_VAR_bucket_name="stage-bucket"
+            ;;
+          prod)
+            export TF_VAR_project_id="my-prod-project"
+            export TF_VAR_region="europe-west1"
+            export TF_VAR_bucket_name="prod-bucket"
+            ;;
+          *)
+            echo "Invalid environment: $_ENV"
+            exit 1
+            ;;
+        esac
 
         terraform init
         terraform plan -out=tfplan
         terraform apply -auto-approve tfplan
 
 timeout: 1200s
+
 
