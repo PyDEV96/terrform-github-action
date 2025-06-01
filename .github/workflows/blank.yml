@@ -1,0 +1,35 @@
+name: Deploy to GCP via Cloud Build
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Environment to deploy to"
+        required: true
+        default: "dev"
+        type: choice
+        options:
+          - dev
+          - stage
+          - prod
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Trigger Cloud Build via Webhook
+        run: |
+          case "${{ github.event.inputs.environment }}" in
+            dev)
+              WEBHOOK_URL="${{ secrets.CB_WEBHOOK_DEV }}"
+              ;;
+            stage)
+              WEBHOOK_URL="${{ secrets.CB_WEBHOOK_STAGE }}"
+              ;;
+            prod)
+              WEBHOOK_URL="${{ secrets.CB_WEBHOOK_PROD }}"
+              ;;
+          esac
+
+          curl -X POST "$WEBHOOK_URL"
